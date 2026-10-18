@@ -1,0 +1,7 @@
+order_id,department,revenue,region
+1001,Sales,1200,North
+1002,Support,450,West
+1003,Sales,980,North
+1003,Sales,980,North
+1004,Marketing,720,South
+1005,Support,,East
