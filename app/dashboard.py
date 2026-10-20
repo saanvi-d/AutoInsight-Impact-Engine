@@ -189,8 +189,87 @@ else:
         st.markdown("#### Data quality findings")
         st.caption("Outliers are statistical flags for review, not automatically incorrect values. The health score does not penalize outliers.")
         st.dataframe(quality_findings(df), width="stretch", hide_index=True)
+        
+        st.divider()
+        st.subheader("💬 Ask Questions About Your Dataset")
+        st.caption(
+            "Ask questions about rows, columns, missing values, "
+            "duplicates, and numeric statistics."
+        )
+
+        question = st.text_input(
+            "Your question",
+            placeholder="e.g. How many rows are in this dataset?",
+            key="dataset_question"
+        )
+
+        if st.button("Get Answer", type="primary", key="answer_question_btn"):
+            if not question.strip():
+                st.warning("Please enter a question.")
+            else:
+                q = question.strip().lower()
+
+                if "row" in q:
+                    st.success(f"Your dataset contains {len(df):,} rows.")
+
+                elif "column" in q:
+                    st.success(
+                        f"Your dataset contains {len(df.columns):,} columns."
+                    )
+
+                elif "missing" in q or "null" in q or "na values" in q:
+                    missing = int(df.isna().sum().sum())
+                    st.success(f"Your dataset contains {missing:,} missing cells.")
+                    st.dataframe(
+                        df.isna().sum().rename("Missing values").to_frame(),
+                        use_container_width=True
+                    )
+
+                elif "duplicate" in q:
+                    duplicates = int(df.duplicated().sum())
+                    st.success(f"Your dataset contains {duplicates:,} duplicate rows.")
+
+                elif "average" in q or "mean" in q:
+                    if numeric:
+                        selected_col = st.selectbox(
+                            "Choose the column",
+                            numeric,
+                            key="qa_mean_column"
+                        )
+                        st.info(
+                            f"Mean of {selected_col}: "
+                            f"{df[selected_col].mean():,.4f}"
+                        )
+                    else:
+                        st.warning("This dataset has no numeric columns.")
+
+                elif "median" in q:
+                    if numeric:
+                        selected_col = st.selectbox(
+                            "Choose the column",
+                            numeric,
+                            key="qa_median_column"
+                        )
+                        st.info(
+                            f"Median of {selected_col}: "
+                            f"{df[selected_col].median():,.4f}"
+                        )
+                    else:
+                        st.warning("This dataset has no numeric columns.")
+
+                else:
+                    st.warning(
+                        "I can't answer that question yet. Try asking about "
+                        "rows, columns, missing values, duplicates, mean, or median."
+                    )
+
         if st.button("Next: Explore charts →", type="primary"):
-            move(STEPS[2]); st.rerun()
+            move(STEPS[2])
+            st.rerun()
+
+        if st.button("Next: Explore charts →", type="primary",key="next_explore_charts_btn"):
+            move(STEPS[2])
+            st.rerun()
 
     elif st.session_state.step == STEPS[2]:
         st.subheader("Automatic EDA: graphs, relationships and maps")
